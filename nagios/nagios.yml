@@ -1,0 +1,52 @@
+---
+- hosts: apache 
+  user: user
+  become: yes
+  gather_facts: yes
+  tasks:
+  - name: Install the packages
+    yum: name={{ item }} state=latest
+    with_items:
+    - httpd
+    - httpd-tools
+    - php
+    - gcc
+    - glibc
+    - gd
+    - gd-level
+    - make
+    - net-snmp
+  
+  - name: Create Group
+    group: name=nagcmd  state=present
+ 
+  - name: Create Nagios User
+    user: name={{ items }} groups=nagcmd
+    with_items:
+    - nagios
+    - apache
+
+  - name: Nagios Directory for installation
+    file: path=/opt/nagios_packages state=directory
+ 
+  - name: Installing the nagios packages
+    unarchive: src={{ items }} dest=/opt/nagios_packages remote_src= yes
+    with_items:
+    - https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz
+    - https://nagios-plugins.org/download/nagios-plugins-2.1.4.tar.gz
+
+  - name: Configure the nagios core
+    command: ./configure --with-command-group=nagcmd  && make all && make install && make-install-init && make install-commandmode && make install-config --prefix=/opt/nagios chdir=nagios-4.3.4
+
+  - name: Install and Configure Web Interface for Nagios
+    command: make install-webconf chdir=nagios-4.3.4
+
+  - name: Set the password for apache directory using htpasswd fir user nagiosadmin
+    htpasswd: path=/opt/nagios/etc/htpasswd.users name=nagiosadmin password=ajay@123
+
+  - name: Start the apache service
+    service: name=httpd state=started enabled=yes
+
+  - name: Installing nagios plugin
+     
+  
