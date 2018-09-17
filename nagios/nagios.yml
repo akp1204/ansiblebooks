@@ -36,7 +36,7 @@
     - https://nagios-plugins.org/download/nagios-plugins-2.1.4.tar.gz
 
   - name: Configure the nagios core
-    command: ./configure --with-command-group=nagcmd  && make all && make install && make-install-init && make install-commandmode && make install-config --prefix=/opt/nagios chdir=nagios-4.3.4
+    command: ./configure --with-command-group=nagcmd  && make all && make install && make-install-init && make install-commandmode && make install-config --prefix=/opt/nagios chdir=/opt/nagios_packages/nagios-4.3.4
 
   - name: Install and Configure Web Interface for Nagios
     command: make install-webconf chdir=nagios-4.3.4
@@ -48,5 +48,7 @@
     service: name=httpd state=started enabled=yes
 
   - name: Installing nagios plugin
+    command: ./configure --with-nagios-user=nagios --with-nagios-group=nagios && make && make install chdir=/opt/nagios_packages/nagios-plugins-2.1.4
      
+  - name:
   
